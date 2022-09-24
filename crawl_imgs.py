@@ -1,19 +1,41 @@
+import argparse
 import requests
+from tqdm import tqdm
+from pathlib import Path
+from config import cfg
 
-def get_pic_url(i):
-  return 'http://thuvien.hmu.edu.vn/pages/cms/TempDir/books/4393e103-0ffa-4a0d-8670-1726750491f0/2021/12/30/202112301044-fe7bdee8-958b-4d11-a623-faa5ecfd2392/FullPreview/000%s.jpg' % i
+def get_pic_url(prefix, index, extentsion, fill_to):
+  return f'{prefix}{str(index).zfill(fill_to)}{extentsion}'
 
-for i in range(1,353):
-  pic_url = get_pic_url(str(i).zfill(3))
-  print('downloading: %s' % pic_url)
-  with open('imgs'+'/%s.jpg' % (i), 'wb') as handle:
-    response = requests.get(pic_url, stream=True)
+def crawl_imgs(prefix, extentsion, fill_to, start_idx, end_idx, imgs_dir):
+  print(f'Downloading images from: {prefix}')
 
-    if not response.ok:
-        print(response)
+  with tqdm(range(start_idx, end_idx + 1)) as t:
+    for i in t:
+      pic_url = get_pic_url(prefix, i, extentsion, fill_to)
+      t.set_description(f'{pic_url.replace(prefix,"")}')
+      
+      Path(f'./{imgs_dir}').mkdir(parents=True, exist_ok=True)
+      with open(f'{imgs_dir}/{i}{extentsion}', 'wb') as handle:
+        response = requests.get(pic_url, stream=True)
 
-    for block in response.iter_content(1024):
-        if not block:
-            break
+        if not response.ok:
+            print(response)
 
-        handle.write(block)
+        for block in response.iter_content(1024):
+            if not block:
+                break
+
+            handle.write(block)
+  print(f'Download completed. Images are located at: /{imgs_dir}')
+
+def main():
+  parser = argparse.ArgumentParser()
+  parser.add_argument('--cfg_file', default='config.yml', help='Config file for images crawling ( must be in "./config" directory )')
+  opt = parser.parse_args()
+  cfg.merge_from_file(f'./config/{opt.cfg_file}')
+  cfg.freeze()
+  crawl_imgs(cfg.URL_PREFIX, cfg.IMG_EXTENSTION, cfg.FILL_TO, cfg.START_INDEX, cfg.END_INDEX, cfg.IMG_DIR)
+
+if __name__ == '__main__':
+  main()

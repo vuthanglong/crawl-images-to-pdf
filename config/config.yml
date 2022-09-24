@@ -1,0 +1,10 @@
+URL_PREFIX: 'http://thuvien.hmu.edu.vn/pages/cms/TempDir/books/4393e103-0ffa-4a0d-8670-1726750491f0/2021/12/30/202112301044-fe7bdee8-958b-4d11-a623-faa5ecfd2392/FullPreview/'
+FILL_TO: 6
+IMG_EXTENSTION: '.jpg'
+START_INDEX: 1
+END_INDEX: 352
+
+IMG_DIR: 'imgs'
+
+OUTPUT: 'output.pdf'
+OUTPUT_DIR: 'pdf'
